@@ -15,16 +15,16 @@ import time
 import tty
 
 
-VERSION = '0.0.7'
+VERSION = '0.0.1'
 git_dir = os.path.abspath(
     os.path.join(
         os.path.dirname(
             os.path.abspath(__file__)),
         '..'))
-axe_conf_dir = os.path.join(os.getenv('HOME'), '.axecore')
-axe_cli_path = os.getenv('AXE_CLI')
-if os.getenv('AXERUNNER_PID') is None:
-    quit("--> please run using 'axerunner vote'")
+xbi_conf_dir = os.path.join(os.getenv('HOME'), '.XBI')
+xbi_cli_path = os.getenv('XBI_CLI')
+if os.getenv('XBIRUNNER_PID') is None:
+    quit("--> please run using 'xbitool vote'")
 
 sys.path.append(git_dir + '/lib')
 import axeutil
@@ -83,7 +83,7 @@ if "check_output" not in dir( subprocess ):
 def run_command(cmd):
     return subprocess.check_output(cmd, shell=True)
 
-def run_axe_cli_command(cmd):
+def run_xbi_cli_command(cmd):
     return run_command("%s %s" % (axe_cli_path or 'axe-cli', cmd))
 
 def next_vote(sel_ent):
@@ -310,19 +310,19 @@ def main(screen):
     C_GREEN = curses.color_pair(3)
     C_RED = curses.color_pair(2)
 
-    if axe_cli_path is None:
-        # test axe-cli in path -- TODO make robust
+    if xbi_cli_path is None:
+        # test xbi-cli in path -- TODO make robust
         try:
-            run_command('axe-cli getinfo')
+            run_command('xbi-cli getinfo')
         except subprocess.CalledProcessError:
             quit(
-                "--> cannot find axe-cli in $PATH\n" +
+                "--> cannot find xbi-cli in $PATH\n" +
                 "    do: export PATH=/path/to/axe-cli-folder:$PATH\n" +
                 "    and try again\n")
 
     loadwin = curses.newwin(40, 40, 1, 2)
 
-    loadwin.addstr(1, 2, 'axevote version: ' + version, C_CYAN)
+    loadwin.addstr(1, 2, 'xbivote version: ' + version, C_CYAN)
 
     mncount = int(run_axe_cli_command('masternode count enabled'))
     block_height = int(run_axe_cli_command('getblockcount'))
@@ -403,7 +403,7 @@ def main(screen):
 
     # extract mnprivkey,txid-txidx from masternode.conf
     masternodes = {}
-    with open(os.path.join(axe_conf_dir, 'masternode.conf'), 'r') as f:
+    with open(os.path.join(xbi_conf_dir, 'masternode.conf'), 'r') as f:
         lines = list(
             line
             for line in
@@ -421,7 +421,7 @@ def main(screen):
                 "txout": conf[4]}
     if not masternodes:
         # fallback to axe.conf entries if no masternode.conf entries
-        with open(os.path.join(axe_conf_dir, 'axe.conf'), 'r') as f:
+        with open(os.path.join(xbi_conf_dir, 'xbi.conf'), 'r') as f:
             lines = list(
                 line
                 for line in
@@ -432,7 +432,7 @@ def main(screen):
                 n, v = line.split('=')
                 conf[n.strip(' ')] = v.strip(' ')
             if all(k in conf for k in ('masternode', 'externalip', 'masternodeprivkey')):
-                # get funding tx from axeninja
+                # get funding tx from axeninja --does not work / no alternative for xbi
                 import urllib2
                 mninfo = urllib2.urlopen(
                     "https://axeninja.pl/api/masternodes?ips=[\"" +
@@ -454,7 +454,7 @@ def main(screen):
                     "txid": vin,
                     "txout": vidx}
             else:
-                quit('cannot find masternode information in axe.conf')
+                quit('cannot find masternode information in xbi.conf')
 
     # TODO open previous votes/local storage something
     for entry in ballot:
@@ -478,7 +478,7 @@ def main(screen):
     votewin.keypad(1)
     votewin.border()
 
-    votewin.addstr(1, 2, 'axevote version: ' + version, C_CYAN)
+    votewin.addstr(1, 2, 'xbivote version: ' + version, C_CYAN)
     votewin.addstr(
         2,
         2,
